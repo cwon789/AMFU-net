@@ -3,12 +3,18 @@
 **Authors : Won Young Chung, In Ho Lee, and [Chan Gook Park](https://scholar.google.com/citations?user=9gwkQ7AAAAAJ&hl=en)**
 
 
+
+
 ### 1. Overview
 
 ![outline](./pic/Overall_structure.png) 
+
 This is a pytorch implementation of Attention Multiscale Feature Fusion U-Net(AMFU-net).[[Paper]](https://ieeexplore.ieee.org/abstract/document/10124752)
 
+
 We propose a lightweight infrared small target detection network which performs effective small target detection by fusiong feaure maps obtained from each layer stage. Inspired by the [DNA-net](https://github.com/YeRen123455/Infrared-Small-Target-Detection), we designed an IRSTD network using attention modules and UNet3+, a U-net based network that fuses features through a full-scale skip connection between the encoder and the decoder without using dense convolutions.
+
+
 
 
 ### 2. Prerequisites 
@@ -19,6 +25,8 @@ We propose a lightweight infrared small target detection network which performs 
 
 #### Dataset
 * ACM-dataset(NUAA-SIRST)  [Dataset](https://github.com/YimianDai/open-acm)
+
+
 
 
 ### 3. Run
@@ -53,8 +61,11 @@ python demo_mp4_for_save.py
 ```
 
 * MP4 results 
+
 ![outline](./pic/AMFU_IR_20.gif)
 ![outline](./pic/AMFU_detected_20.gif)
+
+
 
 
 ### 4. Results
@@ -63,6 +74,8 @@ python demo_mp4_for_save.py
 
 #### Quantitative analysis (Single frame)
 ![outline](./pic/Quantitative.png)
+
+
 
 
 ### 5. Citation
@@ -79,9 +92,13 @@ If you feel this work helpful to your academic research, we kindly ask you to ci
 }
 ```
 
+
+
 ### 6. Acknowledgements
 
 This work was supported by the Artificial Intelligence Based Flight Control Research Laboratory funded by the Defense Acquisition Program Administration under Grant UD230014SD.
+
+
 
 
 ### 7. Special Thanks to 
