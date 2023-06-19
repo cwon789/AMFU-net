@@ -1,11 +1,11 @@
 # Attention Multiscale Feature Fusion U-Net (AMFU-net)
 
-**Authors : [Won Young Chung], [In Ho Lee], and [Chan Gook Park](https://scholar.google.com/citations?user=9gwkQ7AAAAAJ&hl=en)**
+**Authors : Won Young Chung, In Ho Lee, and [Chan Gook Park](https://scholar.google.com/citations?user=9gwkQ7AAAAAJ&hl=en)**
 
 
 ### 1. Overview
 
-![outline](AMFU-net/pic/Overall structure.PNG) 
+![outline](pic/Overall structure.PNG) 
 This is a pytorch implementation of Attention Multiscale Feature Fusion U-Net(AMFU-net).[[Paper]](https://ieeexplore.ieee.org/abstract/document/10124752)
 
 We propose a lightweight infrared small target detection network which performs effective small target detection by fusiong feaure maps obtained from each layer stage. Inspired by the [DNA-net](https://github.com/YeRen123455/Infrared-Small-Target-Detection), we designed an IRSTD network using attention modules and UNet3+, a U-net based network that fuses features through a full-scale skip connection between the encoder and the decoder without using dense convolutions.
@@ -18,7 +18,7 @@ We propose a lightweight infrared small target detection network which performs 
 * RTX 3090 GPU with 64GB RAM
 
 #### Dataset
-* ACM-dataset(NUAA-SIRST)[Dataset](https://github.com/YimianDai/open-acm)
+* ACM-dataset(NUAA-SIRST)  [Dataset](https://github.com/YimianDai/open-acm)
 
 
 ### 3. Run
@@ -59,10 +59,10 @@ python demo_mp4_for_save.py
 
 ### 4. Results
 #### Qualitative analysis (Single frame)
-[Q_single_img](AMFU-net/pic/Qualitative.PNG)
+[Q_single_img](./pic/Qualitative.PNG)
 
 #### Quantitative analysis (Single frame)
-[Qunt_single_img](AMFU-net/pic/Quantitative.PNG)
+[Qunt_single_img](./pic/Quantitative.PNG)
 
 
 ### 5. Citation
