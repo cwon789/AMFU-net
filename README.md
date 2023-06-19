@@ -53,8 +53,8 @@ python demo_mp4_for_save.py
 ```
 
 * MP4 results 
-!<img infrared = "./pic/AMFU_IR_20.gif" width="256" height="256"/> 
-!<img detected = "./pic/AMFU_detected_20.gif" width="256" height="256"/>
+![outline](./pic/AMFU_IR_20.gif)
+![outline](./pic/AMFU_detected_20.gif)
 
 
 ### 4. Results
