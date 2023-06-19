@@ -53,15 +53,15 @@ python demo_mp4_for_save.py
 ```
 
 * MP4 results 
-<img infrared = "./pic/AMFU_IR_20.gif" width="256" height="256"/> <img detected = "./pic/AMFU_detected_20.gif" width="256" height="256"/>
+!<img infrared = "./pic/AMFU_IR_20.gif" width="256" height="256"/> <img detected = "./pic/AMFU_detected_20.gif" width="256" height="256"/>
 
 
 ### 4. Results
 #### Qualitative analysis (Single frame)
-[Q_single_img](./pic/Qualitative.png)
+![Q_single_img](./pic/Qualitative.png)
 
 #### Quantitative analysis (Single frame)
-[Qunt_single_img](./pic/Quantitative.png)
+![Qunt_single_img](./pic/Quantitative.png)
 
 
 ### 5. Citation
