@@ -5,7 +5,7 @@
 
 
 
-### 1. Overview
+# 1. Overview
 
 ![outline](./pic/Overall_structure.png) 
 
@@ -17,41 +17,68 @@ We propose a lightweight infrared small target detection network which performs 
 
 
 
-### 2. Prerequisites 
-#### Hardware & Software 
+# 2. Prerequisites 
+
+
+## Hardware & Software 
 * Tested on Ubuntu 20.04 
 * Python 3.7.16, Pytorch 1.7.1 with CUDA 11.0, Torchvision 0.8.2
 * RTX 3090 GPU with 64GB RAM
 
-#### Dataset
+
+## Dataset
 * ACM-dataset(NUAA-SIRST)  [Dataset](https://github.com/YimianDai/open-acm)
 
 
 
 
-### 3. Run
-#### Training 
+# 3. Run
+
+
+## Pre-trained weight
+* AMFU-net : 
+
+```
+./result/NUAA-SIRST_AMFU/AMFU_epoch.pth.tar
+```
+
+* AMFU-net w/o attention module : 
+
+```
+./result/NUAA-SIRST_AMFU_noATN/AFMU_noATN.pth.tar
+```
+
+* AMFU-net w/o residual attention block : 
+
+```
+./result/NUAA-SIRST_AMFU_noResATN/AMFU_noResATN.pth.tar
+```
+
+## Training 
 * Change the path(--root, etc..) in utils/parse_args_train.txt
 
 ```
 python train.py
 ```
 
-#### Test
+
+## Test
 * Change the path(--root, etc..) in utils/parse_args_test.txt
 
 ```
 python test.py
 ```
 
-#### Demo
+
+## Demo
 * Change the path (img_demo_dir, checkpoint path)
 
 ```
 python demo.py
 ```
 
-#### Demo mp4
+
+## Demo mp4
 * Multiframe infrared small target detection
 * _for_save : Save result video
 
@@ -59,6 +86,7 @@ python demo.py
 python demo_mp4.py
 python demo_mp4_for_save.py
 ```
+
 
 * MP4 results 
 
@@ -68,9 +96,10 @@ python demo_mp4_for_save.py
 
 
 
-### 4. Results
+# 4. Results
 #### Qualitative analysis (Single frame)
 ![outline](./pic/Qualitative.png)
+
 
 #### Quantitative analysis (Single frame)
 ![outline](./pic/Quantitative.png)
@@ -78,7 +107,7 @@ python demo_mp4_for_save.py
 
 
 
-### 5. Citation
+# 5. Citation
 
 If you feel this work helpful to your academic research, we kindly ask you to cite our paper :
 
@@ -94,14 +123,15 @@ If you feel this work helpful to your academic research, we kindly ask you to ci
 
 
 
-### 6. Acknowledgements
+
+# 6. Acknowledgements
 
 This work was supported by the Artificial Intelligence Based Flight Control Research Laboratory funded by the Defense Acquisition Program Administration under Grant UD230014SD.
 
 
 
 
-### 7. Special Thanks to 
+# 7. Special Thanks to 
 
 This code is highly borrowed from [DNA-net](https://github.com/YeRen123455/Infrared-Small-Target-Detection). Thank to authors.
 
