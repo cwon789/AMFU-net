@@ -267,7 +267,7 @@ def save_model(mean_IOU, best_iou, save_dir, save_prefix, train_loss, test_loss,
             'loss': test_loss,
             'mean_IOU': mean_IOU,
         }, save_path='./AMFU-net/result/' + save_dir,
-            filename='mIoU_' + '_' + save_prefix + '_epoch' + '.pth.tar')
+            filename='mIoU_' + '_' + save_prefix + '.pth.tar')
 
 def save_result_for_test(dataset_dir, st_model, epochs, best_iou, recall, precision, true_positive_rate, false_positive_rate, elapsed_time):
     with open(dataset_dir + '/' + 'value_result'+'/' + st_model +'_best_IoU.log', 'a') as f:

@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument('--mode', type=str, default='TXT', help='mode name:  TXT, Ratio')
     parser.add_argument('--test_size', type=float, default='0.5', help='when mode==Ratio')
 
-    parser.add_argument('--root', type=str, default='/home/jay/catkin_GRSL/AMFU-net/dataset')   ### Change
+    parser.add_argument('--root', type=str, default='/home/jay/catkin_GRSL/2.Detection_compare/DNA_net/dataset')   ### Change
 
     parser.add_argument('--suffix', type=str, default='.png')
     parser.add_argument('--split_method', type=str, default='50_50',

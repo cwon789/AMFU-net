@@ -65,6 +65,7 @@ class Trainer(object):
             self.optimizer  = optim.Adagrad(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
            
         # Evaluation metrics
+        self.best_epochs    = 0
         self.best_iou       = 0
         self.best_recall    = [0,0,0,0,0,0,0,0,0,0,0]
         self.best_precision = [0,0,0,0,0,0,0,0,0,0,0]
@@ -136,10 +137,28 @@ class Trainer(object):
                 tbar.set_description('Epoch %d, test loss %.4f, mean_IoU: %.4f' % (epoch, losses.avg, mean_IOU ))
                 
             test_loss=losses.avg
-        
-        # save high-performance model
-        save_model(mean_IOU, self.best_iou, self.save_dir, self.save_prefix,
-                   self.train_loss, test_loss, recall, precision, epoch, self.model.state_dict())
+            _, mean_IOU = self.mIoU.get()
+            
+            save_model(mean_IOU, self.best_iou, self.save_dir, self.save_prefix,
+            self.train_loss, test_loss, recall, precision, epoch, self.model.state_dict())
+
+            if mean_IOU >self.best_iou:
+                self.best_iou = mean_IOU
+                self.best_epochs = epoch
+                print(" ")
+                print("------------------------------------------------------")
+                print("                Update network weights ")
+                print("------------------------------------------------------")
+            
+            print(" ")
+            print("---------------------- Best IoU ----------------------")
+            print(str(self.best_iou) + ' at epoch ' + str(self.best_epochs) + "  Current Epoch : " + str(epoch))
+            print("------------------------------------------------------")
+            print(" ")
+
+            self.ROC.reset()
+            self.mIoU.reset()
+
 
 def main(args):
     trainer = Trainer(args)
