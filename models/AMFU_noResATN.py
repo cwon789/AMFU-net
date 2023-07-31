@@ -189,62 +189,59 @@ class CBAM_block(nn.Module):
 class AMFU_noResATN(nn.Module):
 
 
-    def __init__(self, in_channels=3, n_classes=1, feature_scale=4, is_deconv=True, is_batchnorm=True):
+    def __init__(self, n_classes, in_channels, block, num_blocks, nb_filter, is_deconv=True, is_batchnorm=True):
         super(AMFU_noResATN, self).__init__()
         self.is_deconv = is_deconv
         self.in_channels = in_channels
         self.is_batchnorm = is_batchnorm
-        self.feature_scale = feature_scale
-
-        filters = [8, 16, 32, 64, 128] # AMFU Net
 
         ## -------------Encoder--------------
-        self.conv1 = unetConv2(self.in_channels, filters[0], self.is_batchnorm)
+        self.conv1 = unetConv2(self.in_channels, nb_filter[0], self.is_batchnorm)
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv2 = unetConv2(filters[0], filters[1], self.is_batchnorm)
+        self.conv2 = unetConv2(nb_filter[0], nb_filter[1], self.is_batchnorm)
         self.maxpool2 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv3 = unetConv2(filters[1], filters[2], self.is_batchnorm)
+        self.conv3 = unetConv2(nb_filter[1], nb_filter[2], self.is_batchnorm)
         self.maxpool3 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv4 = unetConv2(filters[2], filters[3], self.is_batchnorm)
+        self.conv4 = unetConv2(nb_filter[2], nb_filter[3], self.is_batchnorm)
         self.maxpool4 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv5 = unetConv2(filters[3], filters[4], self.is_batchnorm)
+        self.conv5 = unetConv2(nb_filter[3], nb_filter[4], self.is_batchnorm)
 
         ## -------------Decoder--------------
-        self.CatChannels = filters[0]
+        self.CatChannels = nb_filter[0]
         self.CatBlocks = 5
         self.UpChannels = self.CatChannels * self.CatBlocks   # UNet3 paper : 64 x N(CatBlocks) / In my paper : 8 x N(CatBlocks)
 
         '''stage 4d''' 
         # h1->320*320, hd4->40*40, Pooling 8 times
         self.h1_PT_hd4 = nn.MaxPool2d(8, 8, ceil_mode=True)
-        self.h1_PT_hd4_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_PT_hd4_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_PT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_PT_hd4_relu = nn.ReLU(inplace=True)
 
         # h2->160*160, hd4->40*40, Pooling 4 times
         self.h2_PT_hd4 = nn.MaxPool2d(4, 4, ceil_mode=True)
-        self.h2_PT_hd4_conv = nn.Conv2d(filters[1], self.CatChannels, 3, padding=1)
+        self.h2_PT_hd4_conv = nn.Conv2d(nb_filter[1], self.CatChannels, 3, padding=1)
         self.h2_PT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h2_PT_hd4_relu = nn.ReLU(inplace=True)
 
         # h3->80*80, hd4->40*40, Pooling 2 times
         self.h3_PT_hd4 = nn.MaxPool2d(2, 2, ceil_mode=True)
-        self.h3_PT_hd4_conv = nn.Conv2d(filters[2], self.CatChannels, 3, padding=1)
+        self.h3_PT_hd4_conv = nn.Conv2d(nb_filter[2], self.CatChannels, 3, padding=1)
         self.h3_PT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h3_PT_hd4_relu = nn.ReLU(inplace=True)
 
         # h4->40*40, hd4->40*40, Concatenation
-        self.h4_Cat_hd4_conv = nn.Conv2d(filters[3], self.CatChannels, 3, padding=1)
+        self.h4_Cat_hd4_conv = nn.Conv2d(nb_filter[3], self.CatChannels, 3, padding=1)
         self.h4_Cat_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h4_Cat_hd4_relu = nn.ReLU(inplace=True)
 
         # hd5->20*20, hd4->40*40, Upsample 2 times
         self.hd5_UT_hd4 = nn.Upsample(scale_factor=2, mode='bilinear')  # 14*14
-        self.hd5_UT_hd4_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd4_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd4_relu = nn.ReLU(inplace=True)
 
@@ -256,18 +253,18 @@ class AMFU_noResATN(nn.Module):
         '''stage 3d'''
         # h1->320*320, hd3->80*80, Pooling 4 times
         self.h1_PT_hd3 = nn.MaxPool2d(4, 4, ceil_mode=True)
-        self.h1_PT_hd3_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_PT_hd3_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_PT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_PT_hd3_relu = nn.ReLU(inplace=True)
 
         # h2->160*160, hd3->80*80, Pooling 2 times
         self.h2_PT_hd3 = nn.MaxPool2d(2, 2, ceil_mode=True)
-        self.h2_PT_hd3_conv = nn.Conv2d(filters[1], self.CatChannels, 3, padding=1)
+        self.h2_PT_hd3_conv = nn.Conv2d(nb_filter[1], self.CatChannels, 3, padding=1)
         self.h2_PT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.h2_PT_hd3_relu = nn.ReLU(inplace=True)
 
         # h3->80*80, hd3->80*80, Concatenation
-        self.h3_Cat_hd3_conv = nn.Conv2d(filters[2], self.CatChannels, 3, padding=1)
+        self.h3_Cat_hd3_conv = nn.Conv2d(nb_filter[2], self.CatChannels, 3, padding=1)
         self.h3_Cat_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.h3_Cat_hd3_relu = nn.ReLU(inplace=True)
 
@@ -279,7 +276,7 @@ class AMFU_noResATN(nn.Module):
 
         # hd5->20*20, hd4->80*80, Upsample 4 times
         self.hd5_UT_hd3 = nn.Upsample(scale_factor=4, mode='bilinear')  # 14*14
-        self.hd5_UT_hd3_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd3_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd3_relu = nn.ReLU(inplace=True)
 
@@ -291,12 +288,12 @@ class AMFU_noResATN(nn.Module):
         '''stage 2d '''
         # h1->320*320, hd2->160*160, Pooling 2 times
         self.h1_PT_hd2 = nn.MaxPool2d(2, 2, ceil_mode=True)
-        self.h1_PT_hd2_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_PT_hd2_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_PT_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_PT_hd2_relu = nn.ReLU(inplace=True)
 
         # h2->160*160, hd2->160*160, Concatenation
-        self.h2_Cat_hd2_conv = nn.Conv2d(filters[1], self.CatChannels, 3, padding=1)
+        self.h2_Cat_hd2_conv = nn.Conv2d(nb_filter[1], self.CatChannels, 3, padding=1)
         self.h2_Cat_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.h2_Cat_hd2_relu = nn.ReLU(inplace=True)
 
@@ -314,7 +311,7 @@ class AMFU_noResATN(nn.Module):
 
         # hd5->20*20, hd2->160*160, Upsample 8 times
         self.hd5_UT_hd2 = nn.Upsample(scale_factor=8, mode='bilinear')  # 14*14
-        self.hd5_UT_hd2_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd2_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd2_relu = nn.ReLU(inplace=True)
 
@@ -325,7 +322,7 @@ class AMFU_noResATN(nn.Module):
 
         '''stage 1d'''
         # h1->320*320, hd1->320*320, Concatenation
-        self.h1_Cat_hd1_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_Cat_hd1_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_Cat_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_Cat_hd1_relu = nn.ReLU(inplace=True)
 
@@ -349,7 +346,7 @@ class AMFU_noResATN(nn.Module):
 
         # hd5->20*20, hd1->320*320, Upsample 16 times
         self.hd5_UT_hd1 = nn.Upsample(scale_factor=16, mode='bilinear')  # 14*14
-        self.hd5_UT_hd1_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd1_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd1_relu = nn.ReLU(inplace=True)
 
@@ -369,7 +366,7 @@ class AMFU_noResATN(nn.Module):
         self.outconv2 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
         self.outconv3 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
         self.outconv4 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
-        self.outconv5 = nn.Conv2d(filters[4], n_classes, 3, padding=1)
+        self.outconv5 = nn.Conv2d(nb_filter[4], n_classes, 3, padding=1)
 
         # initialise weights
         for m in self.modules():

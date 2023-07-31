@@ -12,6 +12,7 @@ from utils.loss2 import *
 from utils.load_param_data import  load_dataset
 
 # my model
+from models.load_param_data import *
 from models.AMFU import *
 from models.AMFU_noATN import *
 from models.AMFU_noResATN import *
@@ -26,6 +27,7 @@ class Trainer(object):
         self.mIoU = mIoU(1)
         self.save_prefix = '_'.join([args.model, args.dataset])
         self.save_dir    = args.save_dir
+        nb_filter, num_blocks = load_param(args.channel_size, args.backbone)
 
         # Read image index from TXT
         if args.mode == 'TXT':
@@ -44,13 +46,13 @@ class Trainer(object):
         # Network selection
         # my network
         if args.model   == 'AMFU':
-            model       = AMFU()
+            model       = AMFU(n_classes=1, in_channels=3, block=Res_CBAM_block, num_blocks=num_blocks, nb_filter=nb_filter)
         
         elif args.model == 'AMFU_noATN':                      
-            model       = AMFU_noATN()
+            model       = AMFU_noATN(n_classes=1, in_channels=3, block=Res_block, num_blocks=num_blocks, nb_filter=nb_filter)
 
         elif args.model == 'AMFU_noResATN':
-            model       = AMFU_noResATN()
+            model       = AMFU_noResATN(n_classes=1, in_channels=3, block=Res_block, num_blocks=num_blocks, nb_filter=nb_filter)
         
         # model init
         model           = model.cuda()
@@ -60,9 +62,13 @@ class Trainer(object):
 
         # Optimizer and lr scheduling
         if args.optimizer   == 'Adam':
-            self.optimizer  = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
+            self.optimizer  = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.0001)
         elif args.optimizer == 'Adagrad':
             self.optimizer  = optim.Adagrad(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
+        elif args.optimizer == 'AdaDelta':
+            self.optimizer  = optim.Adadelta(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
+        elif args.optimizer == 'AdamW':
+            self.optimizer  = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=0.0001)
            
         # Evaluation metrics
         self.best_epochs    = 0
@@ -147,7 +153,7 @@ class Trainer(object):
                 self.best_epochs = epoch
                 print(" ")
                 print("------------------------------------------------------")
-                print("                Update network weights ")
+                print("                Update network weights                ")
                 print("------------------------------------------------------")
             
             print(" ")
@@ -162,12 +168,24 @@ class Trainer(object):
 
 def main(args):
     trainer = Trainer(args)
+
+    # Time check
+    start_time = torch.cuda.Event(enable_timing = True)
+    end_time = torch.cuda.Event(enable_timing = True)
+
+    start_time.record()
     for epoch in range(args.start_epoch, args.epochs):
         trainer.training(epoch)
         trainer.testing(epoch)
+    end_time.record()
+
+    torch.cuda.synchronize()
+    print(str(start_time.elapsed_time(end_time)/1000) + 'min')
 
 
 if __name__ == "__main__":
     args = parse_args()
     print('---------------------',args.model,'---------------------')
+    print('Optimizer : ', args.optimizer)
+    print('DSV : ', args.deep_supervision)
     main(args)

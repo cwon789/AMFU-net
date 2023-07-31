@@ -118,64 +118,61 @@ class CBAM_block(nn.Module):
 class AMFU(nn.Module):
 
 
-    def __init__(self, in_channels=3, n_classes=1, feature_scale=4, is_deconv=True, is_batchnorm=True):
+    def __init__(self, n_classes, in_channels, block, num_blocks, nb_filter, is_deconv=True, is_batchnorm=True):
         super(AMFU, self).__init__()
         self.is_deconv = is_deconv
         self.in_channels = in_channels
         self.is_batchnorm = is_batchnorm
-        self.feature_scale = feature_scale
-
-        filters = [8, 16, 32, 64, 128] # AMFU Net
 
         self.dropout = nn.Dropout(0.1)
 
         ## -------------Encoder--------------
-        self.conv1 = Res_CBAM_block(self.in_channels, filters[0])
+        self.conv1 = self._make_layer(block, in_channels, nb_filter[0])
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv2 = Res_CBAM_block(filters[0], filters[1])
+        self.conv2 = self._make_layer(block, nb_filter[0], nb_filter[1], num_blocks[0])
         self.maxpool2 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv3 = Res_CBAM_block(filters[1], filters[2])
+        self.conv3 = self._make_layer(block, nb_filter[1], nb_filter[2], num_blocks[1])
         self.maxpool3 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv4 = Res_CBAM_block(filters[2], filters[3])
+        self.conv4 = self._make_layer(block, nb_filter[2], nb_filter[3], num_blocks[2])
         self.maxpool4 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv5 = Res_CBAM_block(filters[3], filters[4])
+        self.conv5 = self._make_layer(block, nb_filter[3], nb_filter[4], num_blocks[3])
 
         ## -------------Decoder--------------
-        self.CatChannels = filters[0]
+        self.CatChannels = nb_filter[0]
         self.CatBlocks = 5
         self.UpChannels = self.CatChannels * self.CatBlocks   # UNet3 paper : 64 x N(CatBlocks) / In my paper (AMFU-net) : 8 x N(CatBlocks)
 
         '''stage 4d''' 
         # h1->256*256, hd4->32*32, Pooling 8 times
         self.h1_PT_hd4 = nn.MaxPool2d(8, 8, ceil_mode=True)
-        self.h1_PT_hd4_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_PT_hd4_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_PT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_PT_hd4_relu = nn.ReLU(inplace=True)
 
         # h2->128*128, hd4->32*32, Pooling 4 times
         self.h2_PT_hd4 = nn.MaxPool2d(4, 4, ceil_mode=True)
-        self.h2_PT_hd4_conv = nn.Conv2d(filters[1], self.CatChannels, 3, padding=1)
+        self.h2_PT_hd4_conv = nn.Conv2d(nb_filter[1], self.CatChannels, 3, padding=1)
         self.h2_PT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h2_PT_hd4_relu = nn.ReLU(inplace=True)
 
         # h3->64*64, hd4->32*32, Pooling 2 times
         self.h3_PT_hd4 = nn.MaxPool2d(2, 2, ceil_mode=True)
-        self.h3_PT_hd4_conv = nn.Conv2d(filters[2], self.CatChannels, 3, padding=1)
+        self.h3_PT_hd4_conv = nn.Conv2d(nb_filter[2], self.CatChannels, 3, padding=1)
         self.h3_PT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h3_PT_hd4_relu = nn.ReLU(inplace=True)
 
         # h4->32*32, hd4->32*32, Concatenation
-        self.h4_Cat_hd4_conv = nn.Conv2d(filters[3], self.CatChannels, 3, padding=1)
+        self.h4_Cat_hd4_conv = nn.Conv2d(nb_filter[3], self.CatChannels, 3, padding=1)
         self.h4_Cat_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.h4_Cat_hd4_relu = nn.ReLU(inplace=True)
 
         # hd5->16*16, hd4->32*32, Upsample 2 times
         self.hd5_UT_hd4 = nn.Upsample(scale_factor=2, mode='bilinear')  
-        self.hd5_UT_hd4_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd4_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd4_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd4_relu = nn.ReLU(inplace=True)
 
@@ -187,18 +184,18 @@ class AMFU(nn.Module):
         '''stage 3d'''
         # h1->256*256, hd3->64*64, Pooling 4 times
         self.h1_PT_hd3 = nn.MaxPool2d(4, 4, ceil_mode=True)
-        self.h1_PT_hd3_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_PT_hd3_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_PT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_PT_hd3_relu = nn.ReLU(inplace=True)
 
         # h2->128*128, hd3->64*64, Pooling 2 times
         self.h2_PT_hd3 = nn.MaxPool2d(2, 2, ceil_mode=True)
-        self.h2_PT_hd3_conv = nn.Conv2d(filters[1], self.CatChannels, 3, padding=1)
+        self.h2_PT_hd3_conv = nn.Conv2d(nb_filter[1], self.CatChannels, 3, padding=1)
         self.h2_PT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.h2_PT_hd3_relu = nn.ReLU(inplace=True)
 
         # h3->64*64, hd3->64*64, Concatenation
-        self.h3_Cat_hd3_conv = nn.Conv2d(filters[2], self.CatChannels, 3, padding=1)
+        self.h3_Cat_hd3_conv = nn.Conv2d(nb_filter[2], self.CatChannels, 3, padding=1)
         self.h3_Cat_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.h3_Cat_hd3_relu = nn.ReLU(inplace=True)
 
@@ -210,7 +207,7 @@ class AMFU(nn.Module):
 
         # hd5->16*16, hd4->64*64, Upsample 4 times
         self.hd5_UT_hd3 = nn.Upsample(scale_factor=4, mode='bilinear')  
-        self.hd5_UT_hd3_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd3_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd3_relu = nn.ReLU(inplace=True)
 
@@ -222,12 +219,12 @@ class AMFU(nn.Module):
         '''stage 2d '''
         # h1->256*256, hd2->128*128, Pooling 2 times
         self.h1_PT_hd2 = nn.MaxPool2d(2, 2, ceil_mode=True)
-        self.h1_PT_hd2_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_PT_hd2_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_PT_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_PT_hd2_relu = nn.ReLU(inplace=True)
 
         # h2->128*128, hd2->128*128, Concatenation
-        self.h2_Cat_hd2_conv = nn.Conv2d(filters[1], self.CatChannels, 3, padding=1)
+        self.h2_Cat_hd2_conv = nn.Conv2d(nb_filter[1], self.CatChannels, 3, padding=1)
         self.h2_Cat_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.h2_Cat_hd2_relu = nn.ReLU(inplace=True)
 
@@ -245,7 +242,7 @@ class AMFU(nn.Module):
 
         # hd5->16*16, hd2->128*128, Upsample 8 times
         self.hd5_UT_hd2 = nn.Upsample(scale_factor=8, mode='bilinear')  
-        self.hd5_UT_hd2_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd2_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd2_relu = nn.ReLU(inplace=True)
 
@@ -256,7 +253,7 @@ class AMFU(nn.Module):
 
         '''stage 1d'''
         # h1->256*256, hd1->256*256, Concatenation
-        self.h1_Cat_hd1_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
+        self.h1_Cat_hd1_conv = nn.Conv2d(nb_filter[0], self.CatChannels, 3, padding=1)
         self.h1_Cat_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_Cat_hd1_relu = nn.ReLU(inplace=True)
 
@@ -280,7 +277,7 @@ class AMFU(nn.Module):
 
         # hd5->16*16, hd1->256*256, Upsample 16 times
         self.hd5_UT_hd1 = nn.Upsample(scale_factor=16, mode='bilinear')  
-        self.hd5_UT_hd1_conv = nn.Conv2d(filters[4], self.CatChannels, 3, padding=1)
+        self.hd5_UT_hd1_conv = nn.Conv2d(nb_filter[4], self.CatChannels, 3, padding=1)
         self.hd5_UT_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd5_UT_hd1_relu = nn.ReLU(inplace=True)
 
@@ -300,7 +297,7 @@ class AMFU(nn.Module):
         self.outconv2 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
         self.outconv3 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
         self.outconv4 = nn.Conv2d(self.UpChannels, n_classes, 3, padding=1)
-        self.outconv5 = nn.Conv2d(filters[4], n_classes, 3, padding=1)
+        self.outconv5 = nn.Conv2d(nb_filter[4], n_classes, 3, padding=1)
 
         # Cat attention
         self.cat_attn = Res_CBAM_block(in_channels=self.UpChannels, out_channels=self.UpChannels)  
@@ -311,6 +308,14 @@ class AMFU(nn.Module):
                 init_weights(m, init_type='xavier')
             elif isinstance(m, nn.BatchNorm2d):
                 init_weights(m, init_type='xavier')
+
+
+    def _make_layer(self, block, input_channels, output_channels, num_blocks=1):
+        layers = []
+        layers.append(block(input_channels, output_channels))
+        for i in range(num_blocks-1):
+            layers.append(block(output_channels, output_channels))
+        return nn.Sequential(*layers)
 
 
     def forward(self, inputs):

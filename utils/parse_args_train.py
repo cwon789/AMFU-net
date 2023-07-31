@@ -6,7 +6,13 @@ def parse_args():
     # choose model
     parser.add_argument('--model', type=str, default='AMFU',                                  ######## Change
                         help='AMFU, AMFU_noATN, AMFU_noResATN')
-    
+    # Defualt = two
+    parser.add_argument('--channel_size', type=str, default='two',
+                        help='one,  two,  three,  four')
+    # Defualt = resnet_10
+    parser.add_argument('--backbone', type=str, default='resnet_34',
+                        help='vgg10, resnet_10,  resnet_18,  resnet_34 ')
+
     # parameter for AMFU-net
     parser.add_argument('--deep_supervision', type=str, default='DSV', help='DSV or None') 
 
