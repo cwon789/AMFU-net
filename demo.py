@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--deep_supervision', type=str, default='DSV', help='DSV or None')        ######## Change
 
     # data and pre-process
-    parser.add_argument('--img_demo_dir', type=str, default='/home/jay/catkin_GRSL/3.Detection_compare/DNA_net/img_demo/demo_img',
+    parser.add_argument('--img_demo_dir', type=str, default='/your/own/path',
                         help='img_demo')
     parser.add_argument('--img_demo_index', type=str,default='Misc_212',
                         help='target1, target2, target3')
@@ -59,7 +59,6 @@ class Trainer(object):
 
         # Initial
         self.args  = args
-        nb_filter, num_blocks = load_param(args.channel_size, args.backbone)
         img_dir   = args.img_demo_dir+'/'+args.img_demo_index+args.suffix
 
         # Preprocess and load data
@@ -114,7 +113,7 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    print('---------------------',args.model, args.backbone, '---------------------')
+    print('---------------------',args.model, '---------------------')
     main(args)
 
 

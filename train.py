@@ -27,7 +27,6 @@ class Trainer(object):
         self.mIoU = mIoU(1)
         self.save_prefix = '_'.join([args.model, args.dataset])
         self.save_dir    = args.save_dir
-        nb_filter, num_blocks = load_param(args.channel_size, args.backbone)
 
         # Read image index from TXT
         if args.mode == 'TXT':
@@ -46,13 +45,13 @@ class Trainer(object):
         # Network selection
         # my network
         if args.model   == 'AMFU':
-            model       = AMFU(n_classes=1, in_channels=3, block=Res_CBAM_block, num_blocks=num_blocks, nb_filter=nb_filter)
+            model       = AMFU()
         
         elif args.model == 'AMFU_noATN':                      
-            model       = AMFU_noATN(n_classes=1, in_channels=3, block=Res_block, num_blocks=num_blocks, nb_filter=nb_filter)
+            model       = AMFU_noATN()
 
         elif args.model == 'AMFU_noResATN':
-            model       = AMFU_noResATN(n_classes=1, in_channels=3, block=Res_block, num_blocks=num_blocks, nb_filter=nb_filter)
+            model       = AMFU_noResATN()
         
         # model init
         model           = model.cuda()

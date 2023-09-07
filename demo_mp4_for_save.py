@@ -22,7 +22,7 @@ from models.AMFU_noATN import *
 from models.AMFU_noResATN import *
 
 
-video_dir = '/home/jay/catkin_GRSL/LM.UNet_variations/img_demo/demo_video/test20.mp4'
+video_dir = '/your/own/path'
 cap = cv2.VideoCapture(video_dir)
 
 # Torch transform
@@ -36,7 +36,7 @@ model = model.cuda()
 model.apply(weights_init_xavier)
 
 # Load checkpoint
-checkpoint      = torch.load('/home/jay/catkin_GRSL/3.Detection_compare/DNA_net/result_1/NUAA-SIRST_UNet3_CGM/mIoU__UNet3_CGM_NUAA-SIRST_epoch.pth.tar')
+checkpoint      = torch.load('./AMFU-net/result/NUAA-SIRST_AMFU/AMFU_epoch.pth.tar') # pre-trained
 model.load_state_dict(checkpoint['state_dict'])
 
 # For test 
