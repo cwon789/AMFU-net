@@ -179,7 +179,7 @@ def main(args):
     end_time.record()
 
     torch.cuda.synchronize()
-    print(str(start_time.elapsed_time(end_time)/1000) + 'min')
+    print(str(start_time.elapsed_time(end_time)/60000) + 'min')
 
 
 if __name__ == "__main__":
