@@ -27,7 +27,7 @@ We propose a lightweight infrared small target detection network which performs 
 
 
 ### Dataset
-* ACM-dataset(NUAA-SIRST)  [Dataset](https://github.com/YimianDai/open-acm)
+* ACM-dataset(NUAA-SIRST)  [Dataset](https://github.com/YimianDai/sirst)
 
 
 
@@ -147,7 +147,7 @@ This code is highly borrowed from [DNA-net](https://github.com/YeRen123455/Infra
 }
 ```
 
-Dataset from [ACM(NUAA-SIRST)](https://github.com/YimianDai/open-acm). Thanks to authors.
+Dataset from [ACM(NUAA-SIRST)](https://github.com/YimianDai/sirst). Thanks to authors.
 
 ```
 @inproceedings{dai21acm,
@@ -155,5 +155,15 @@ Dataset from [ACM(NUAA-SIRST)](https://github.com/YimianDai/open-acm). Thanks to
   author  =  {Yimian Dai and Yiquan Wu and Fei Zhou and Kobus Barnard},
   booktitle =  {{IEEE} Winter Conference on Applications of Computer Vision, {WACV} 2021}
   year    =  {2021}
+}
+```
+
+```
+@article{TGRS21ALCNet,
+  author    = {{Dai}, Yimian and {Wu}, Yiquan and {Zhou}, Fei and {Barnard}, Kobus},
+  title   = {{Attentional Local Contrast Networks for Infrared Small Target Detection}},
+  journal = {IEEE Transactions on Geoscience and Remote Sensing},
+  pages   = {1--12},
+  year    = {2021},
 }
 ```
